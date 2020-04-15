@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/benka-me/laruche-graphql/server"
 	"github.com/benka-me/laruche/go-pkg/discover"
 	"github.com/urfave/cli"
 	"log"
@@ -24,7 +25,7 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				}
-				return Run(engine)
+				return server.Run(engine)
 			},
 		},
 	}
@@ -38,7 +39,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		return Run(engine)
+		return server.Run(engine)
 	}
 
 	err := app.Run(os.Args)

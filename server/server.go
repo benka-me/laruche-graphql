@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -25,9 +25,6 @@ func Run(engine *discover.Engine) error {
 		Clients: rpc.InitClients(*engine, grpc.WithInsecure()),
 	}
 
-	//srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
-	//http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	//http.Handle("/query", srv)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Query")
 		w.Header().Add("Access-Control-Allow-Headers", "*")
@@ -36,7 +33,7 @@ func Run(engine *discover.Engine) error {
 		handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver})).ServeHTTP(w, r)
 	})
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Printf("connect to http://localhost:%s/", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 	return nil
 }

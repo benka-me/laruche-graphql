@@ -478,94 +478,94 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	&ast.Source{Name: "graph/schema.graphqls", Input: `input Auth {
-  Token: String!
+    Token: String!
 }
 type LoginRes{
-  Status: Boolean!
-  TokenErr: String!
+    Status: Boolean!
+    TokenErr: String!
 }
 
 input RegisterReq{
-  email: String!
-  username: String!
-  password: String!
+    email: String!
+    username: String!
+    password: String!
 }
 
 type RegisterRes{
-  Status: Boolean!
-  StatusMessage: String!
+    Status: Boolean!
+    StatusMessage: String!
 }
 
 type Mutation{
-  register(input: RegisterReq!): RegisterRes!
+    register(input: RegisterReq!): RegisterRes!
 }
 
 type Framework {
-  Author: String!
-  Name: String!
+    Author: String!
+    Name: String!
 }
 
 type Rpc {
-  Name: String!
-  Input: String!
-  Output: String!
-  Line: String!
+    Name: String!
+    Input: String!
+    Output: String!
+    Line: String!
 }
 
 input BeeReq {
-  Author: String!
-  Name: String!
-  Auth: Auth!
+    Author: String!
+    Name: String!
+    Auth: Auth!
 }
 
 type Bee {
-  Author: String!
-  Name: String!
-  PkgName: String!
-  Description: String!
-  Repo: String!
-  Port: Int!
-  License: String!
-  Keywords: [String!]!
-  DevLang: Int!
-  Framework: Framework
-  Rpcs: [Rpc!]!
+    Author: String!
+    Name: String!
+    PkgName: String!
+    Description: String!
+    Repo: String!
+    Port: Int!
+    License: String!
+    Keywords: [String!]!
+    DevLang: Int!
+    Framework: Framework
+    Rpcs: [Rpc!]!
 }
 
 type BeeDetails {
-  Readme: String!
+    Readme: String!
 }
 type FullBee {
-  Bee: Bee!
-  Details: BeeDetails!
+    Bee: Bee!
+    Details: BeeDetails!
 }
 
 type Hive {
-  Author: String!
-  Name: String!
-  Repo: String!
+    Author: String!
+    Name: String!
+    Repo: String!
 }
 
 input HomeReq {
-  Token: String!
+    Token: String!
 }
 
 type Home {
-  Bees: [Bee!]!
-  Hives: [Hive!]!
+    Bees: [Bee!]!
+    Hives: [Hive!]!
 }
 
 type Query{
-  Login(username: String!, password: String!): LoginRes!
-  GetHome(input: HomeReq!): Home!
-  GetBee(input: BeeReq!): Bee!
-  GetBeeDetails(input: BeeReq!): BeeDetails!
-  GetFullBee(input: BeeReq!): FullBee!
+    Login(username: String!, password: String!): LoginRes!
+    GetHome(input: HomeReq!): Home!
+    GetBee(input: BeeReq!): Bee!
+    GetBeeDetails(input: BeeReq!): BeeDetails!
+    GetFullBee(input: BeeReq!): FullBee!
 }
 
 schema{
-  query: Query,
-  mutation: Mutation
+    query: Query,
+    mutation: Mutation
 }
 
 `, BuiltIn: false},
