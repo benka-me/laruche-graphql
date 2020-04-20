@@ -26,4 +26,5 @@ protosetup:
 isgateway: false
 deps:
   - benka-me/users
+  - benka-me/laruche-server
 cons: []
