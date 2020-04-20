@@ -19,10 +19,6 @@ type RegisterRes{
     StatusMessage: String!
 }
 
-type Mutation{
-    register(input: RegisterReq!): RegisterRes!
-}
-
 type Framework {
     Author: String!
     Name: String!
@@ -84,10 +80,11 @@ type Query{
     GetBee(input: BeeReq!): Bee!
     GetBeeDetails(input: BeeReq!): BeeDetails!
     GetFullBee(input: BeeReq!): FullBee!
+    Register(input: RegisterReq!): RegisterRes!
 }
 
 schema{
     query: Query,
-    mutation: Mutation
+    #    mutation: Mutation
 }
 

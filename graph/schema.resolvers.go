@@ -6,19 +6,13 @@ package graph
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc/status"
+	"log"
 
 	"github.com/benka-me/laruche-graphql/graph/generated"
 	"github.com/benka-me/laruche-graphql/graph/model"
 	"github.com/benka-me/users/go-pkg/users"
 )
-
-func (r *mutationResolver) Register(ctx context.Context, input model.RegisterReq) (*model.RegisterRes, error) {
-	fmt.Println("register: ", input)
-	return &model.RegisterRes{
-		Status:        true,
-		StatusMessage: "test PitchValue",
-	}, nil
-}
 
 func (r *queryResolver) Login(ctx context.Context, username string, password string) (*model.LoginRes, error) {
 	fmt.Println("login: ", username, password)
@@ -67,13 +61,34 @@ func (r *queryResolver) GetFullBee(ctx context.Context, input model.BeeReq) (*mo
 	}, nil
 }
 
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+func (r *queryResolver) Register(ctx context.Context, input model.RegisterReq) (*model.RegisterRes, error) {
+	log.Println("register: ", input.Username)
+	if input.Password != input.Password2 {
+		return &model.RegisterRes{
+			Status:        false,
+			StatusMessage: "passwords don't matchs",
+		}, nil
+	}
+	_, err := r.Clients.Users.Register(ctx, &users.RegisterReq{
+		Username: input.Username,
+		Email:    input.Email,
+		Password: input.Password,
+	})
+	if err != nil {
+		return &model.RegisterRes{
+			Status:        false,
+			StatusMessage: status.Convert(err).Message(),
+		}, nil
+	}
+	return &model.RegisterRes{
+		Status:        true,
+		StatusMessage: "successfully registred",
+	}, nil
+}
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 
 // !!! WARNING !!!
@@ -82,6 +97,7 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+type mutationResolver struct{ *Resolver }
 
 var BeesDetails = []*model.BeeDetails{
 	{

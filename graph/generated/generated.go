@@ -35,7 +35,6 @@ type Config struct {
 }
 
 type ResolverRoot interface {
-	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -87,16 +86,13 @@ type ComplexityRoot struct {
 		TokenErr func(childComplexity int) int
 	}
 
-	Mutation struct {
-		Register func(childComplexity int, input model.RegisterReq) int
-	}
-
 	Query struct {
 		GetBee        func(childComplexity int, input model.BeeReq) int
 		GetBeeDetails func(childComplexity int, input model.BeeReq) int
 		GetFullBee    func(childComplexity int, input model.BeeReq) int
 		GetHome       func(childComplexity int, input model.HomeReq) int
 		Login         func(childComplexity int, username string, password string) int
+		Register      func(childComplexity int, input model.RegisterReq) int
 	}
 
 	RegisterRes struct {
@@ -112,15 +108,13 @@ type ComplexityRoot struct {
 	}
 }
 
-type MutationResolver interface {
-	Register(ctx context.Context, input model.RegisterReq) (*model.RegisterRes, error)
-}
 type QueryResolver interface {
 	Login(ctx context.Context, username string, password string) (*model.LoginRes, error)
 	GetHome(ctx context.Context, input model.HomeReq) (*model.Home, error)
 	GetBee(ctx context.Context, input model.BeeReq) (*model.Bee, error)
 	GetBeeDetails(ctx context.Context, input model.BeeReq) (*model.BeeDetails, error)
 	GetFullBee(ctx context.Context, input model.BeeReq) (*model.FullBee, error)
+	Register(ctx context.Context, input model.RegisterReq) (*model.RegisterRes, error)
 }
 
 type executableSchema struct {
@@ -299,18 +293,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LoginRes.TokenErr(childComplexity), true
 
-	case "Mutation.register":
-		if e.complexity.Mutation.Register == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_register_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.Register(childComplexity, args["input"].(model.RegisterReq)), true
-
 	case "Query.GetBee":
 		if e.complexity.Query.GetBee == nil {
 			break
@@ -370,6 +352,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Login(childComplexity, args["username"].(string), args["password"].(string)), true
+
+	case "Query.Register":
+		if e.complexity.Query.Register == nil {
+			break
+		}
+
+		args, err := ec.field_Query_Register_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Register(childComplexity, args["input"].(model.RegisterReq)), true
 
 	case "RegisterRes.Status":
 		if e.complexity.RegisterRes.Status == nil {
@@ -437,20 +431,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
-	case ast.Mutation:
-		return func(ctx context.Context) *graphql.Response {
-			if !first {
-				return nil
-			}
-			first = false
-			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
-			var buf bytes.Buffer
-			data.MarshalGQL(&buf)
-
-			return &graphql.Response{
-				Data: buf.Bytes(),
-			}
-		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -496,10 +476,6 @@ input RegisterReq{
 type RegisterRes{
     Status: Boolean!
     StatusMessage: String!
-}
-
-type Mutation{
-    register(input: RegisterReq!): RegisterRes!
 }
 
 type Framework {
@@ -563,11 +539,12 @@ type Query{
     GetBee(input: BeeReq!): Bee!
     GetBeeDetails(input: BeeReq!): BeeDetails!
     GetFullBee(input: BeeReq!): FullBee!
+    Register(input: RegisterReq!): RegisterRes!
 }
 
 schema{
     query: Query,
-    mutation: Mutation
+#    mutation: Mutation
 }
 
 `, BuiltIn: false},
@@ -577,20 +554,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) field_Mutation_register_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.RegisterReq
-	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalNRegisterReq2githubᚗcomᚋbenkaᚑmeᚋlarucheᚑgraphqlᚋgraphᚋmodelᚐRegisterReq(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
 
 func (ec *executionContext) field_Query_GetBeeDetails_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -667,6 +630,20 @@ func (ec *executionContext) field_Query_Login_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["password"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_Register_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.RegisterReq
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNRegisterReq2githubᚗcomᚋbenkaᚑmeᚋlarucheᚑgraphqlᚋgraphᚋmodelᚐRegisterReq(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -1499,47 +1476,6 @@ func (ec *executionContext) _LoginRes_TokenErr(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_register(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_register_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Register(rctx, args["input"].(model.RegisterReq))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.RegisterRes)
-	fc.Result = res
-	return ec.marshalNRegisterRes2ᚖgithubᚗcomᚋbenkaᚑmeᚋlarucheᚑgraphqlᚋgraphᚋmodelᚐRegisterRes(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_Login(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1743,6 +1679,47 @@ func (ec *executionContext) _Query_GetFullBee(ctx context.Context, field graphql
 	res := resTmp.(*model.FullBee)
 	fc.Result = res
 	return ec.marshalNFullBee2ᚖgithubᚗcomᚋbenkaᚑmeᚋlarucheᚑgraphqlᚋgraphᚋmodelᚐFullBee(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_Register(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_Register_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Register(rctx, args["input"].(model.RegisterReq))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.RegisterRes)
+	fc.Result = res
+	return ec.marshalNRegisterRes2ᚖgithubᚗcomᚋbenkaᚑmeᚋlarucheᚑgraphqlᚋgraphᚋmodelᚐRegisterRes(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3449,37 +3426,6 @@ func (ec *executionContext) _LoginRes(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var mutationImplementors = []string{"Mutation"}
-
-func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
-
-	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
-		Object: "Mutation",
-	})
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Mutation")
-		case "register":
-			out.Values[i] = ec._Mutation_register(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3560,6 +3506,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_GetFullBee(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "Register":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_Register(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
