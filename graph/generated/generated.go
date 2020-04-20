@@ -477,7 +477,8 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "graph/schema.graphqls", Input: `input Auth {
+	&ast.Source{Name: "graph/schema.graphqls", Input: `
+input Auth {
     Token: String!
 }
 type LoginRes{
@@ -489,6 +490,7 @@ input RegisterReq{
     email: String!
     username: String!
     password: String!
+    password2: String!
 }
 
 type RegisterRes{
@@ -3158,6 +3160,12 @@ func (ec *executionContext) unmarshalInputRegisterReq(ctx context.Context, obj i
 		case "password":
 			var err error
 			it.Password, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "password2":
+			var err error
+			it.Password2, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

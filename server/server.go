@@ -26,7 +26,7 @@ func Run(engine *discover.Engine) error {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Query")
+		fmt.Println("query: ")
 		w.Header().Add("Access-Control-Allow-Headers", "*")
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 

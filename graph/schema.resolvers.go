@@ -5,11 +5,15 @@ package graph
 
 import (
 	"context"
+	"fmt"
+
 	"github.com/benka-me/laruche-graphql/graph/generated"
 	"github.com/benka-me/laruche-graphql/graph/model"
+	"github.com/benka-me/users/go-pkg/users"
 )
 
 func (r *mutationResolver) Register(ctx context.Context, input model.RegisterReq) (*model.RegisterRes, error) {
+	fmt.Println("register: ", input)
 	return &model.RegisterRes{
 		Status:        true,
 		StatusMessage: "test PitchValue",
@@ -17,9 +21,20 @@ func (r *mutationResolver) Register(ctx context.Context, input model.RegisterReq
 }
 
 func (r *queryResolver) Login(ctx context.Context, username string, password string) (*model.LoginRes, error) {
+	fmt.Println("login: ", username, password)
+	res, err := r.Clients.Users.Login(ctx, &users.LoginReq{
+		Identifier: username,
+		Password:   password,
+	})
+	if err != nil {
+		return &model.LoginRes{
+			Status:   false,
+			TokenErr: "invalid password or username",
+		}, nil
+	}
 	return &model.LoginRes{
 		Status:   true,
-		TokenErr: "Test PitchValue",
+		TokenErr: res.Auth,
 	}, nil
 }
 
@@ -60,6 +75,13 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
 
 var BeesDetails = []*model.BeeDetails{
 	{

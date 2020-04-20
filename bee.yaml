@@ -24,5 +24,6 @@ protosetup:
   - .proto
   - rpc-.proto
 isgateway: false
-deps: []
+deps:
+  - benka-me/users
 cons: []

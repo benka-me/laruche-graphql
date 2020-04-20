@@ -1,3 +1,4 @@
+
 input Auth {
     Token: String!
 }
@@ -10,6 +11,7 @@ input RegisterReq{
     email: String!
     username: String!
     password: String!
+    password2: String!
 }
 
 type RegisterRes{

@@ -61,9 +61,10 @@ type LoginRes struct {
 }
 
 type RegisterReq struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Email     string `json:"email"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	Password2 string `json:"password2"`
 }
 
 type RegisterRes struct {
