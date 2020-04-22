@@ -35,16 +35,17 @@ func (r *queryResolver) Login(ctx context.Context, username string, password str
 }
 
 func (r *queryResolver) GetHome(ctx context.Context, input model.HomeReq) (*model.Home, error) {
+	fmt.Println("get home", input.Token)
 	ret := &model.Home{
 		Bees:  []*model.Bee{},
 		Hives: []*model.Hive{},
 	}
-	auth, _ := r.Clients.Users.Auth(ctx, &users.Token{Val: input.Token})
-	if !auth.Val {
+	auth, err := r.Clients.Users.Auth(ctx, &users.Token{Val: input.Token})
+	if err != nil || !auth.Val {
 		return ret, errors.New("Your are not autenticated")
 	}
 
-	res, err := r.Clients.Larsrv.GetBees(ctx, nil)
+	res, err := r.Clients.Larsrv.GetBees(ctx, &laruche.BeesReq{})
 	if err != nil {
 		return ret, err
 	}

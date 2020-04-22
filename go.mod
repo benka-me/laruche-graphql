@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/99designs/gqlgen v0.11.3
 	github.com/benka-me/laruche v0.0.0-20200415094020-b88ecc730d99
+	github.com/benka-me/laruche-server v0.0.0-20200415094019-a33d917b845b
 	github.com/benka-me/users v0.0.0-20200415110020-f3b85dbfb699
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible // indirect
