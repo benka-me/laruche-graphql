@@ -6,18 +6,14 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
-	"github.com/benka-me/laruche/go-pkg/laruche"
-	"google.golang.org/grpc/status"
-	"log"
-
 	"github.com/benka-me/laruche-graphql/graph/generated"
 	"github.com/benka-me/laruche-graphql/graph/model"
+	"github.com/benka-me/laruche/go-pkg/laruche"
 	"github.com/benka-me/users/go-pkg/users"
+	"google.golang.org/grpc/status"
 )
 
 func (r *queryResolver) Login(ctx context.Context, username string, password string) (*model.LoginRes, error) {
-	fmt.Println("login: ", username, password)
 	res, err := r.Clients.Users.Login(ctx, &users.LoginReq{
 		Identifier: username,
 		Password:   password,
@@ -35,7 +31,6 @@ func (r *queryResolver) Login(ctx context.Context, username string, password str
 }
 
 func (r *queryResolver) GetHome(ctx context.Context, input model.HomeReq) (*model.Home, error) {
-	fmt.Println("get home", input.Token)
 	ret := &model.Home{
 		Bees:  []*model.Bee{},
 		Hives: []*model.Hive{},
@@ -96,7 +91,6 @@ func (r *queryResolver) GetFullBee(ctx context.Context, input model.BeeReq) (*mo
 }
 
 func (r *queryResolver) Register(ctx context.Context, input model.RegisterReq) (*model.RegisterRes, error) {
-	log.Println("register: ", input.Username)
 	if input.Password != input.Password2 {
 		return &model.RegisterRes{
 			Status:        false,
